@@ -11,7 +11,7 @@ import sys
 # =====================================================================
 
 # 阿里云百炼 API Key (建议通过环境变量读取，也可在此处直接将 None 替换为你的真实 Key 字符串)
-API_KEY = 'sk-b90082f1c5544f75891a6d52d2c51559'
+API_KEY = os.getenv("DASHSCOPE_API_KEY", "your_api_key_here")
 
 # WebSocket 服务地址
 WS_URL = "wss://dashscope.aliyuncs.com/api-ws/v1/inference/"
