@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 import time
 import uuid
 from aiohttp import web
@@ -295,7 +296,7 @@ async def simulate_ai_broadcast(app):
         for anchor_id in list(connections["live"].keys()):
             msg_item = save_and_clean_history(anchor_id, {
                 "source": "ai",
-                "content": f"【AI 建议】检测到弹幕活跃度下降，建议主播引导观众点亮粉丝灯牌。({time.strftime('%H:%M:%S')})"
+                "content": f"【AI 建议】{''.join(str(random.randint(0, 9)) for _ in range(20))}({time.strftime('%H:%M:%S')})"
             })
             await broadcast_to_anchor(anchor_id, "recentMessages", {"messages": [msg_item]})
             # print(f"[AI 自动触发] 向主播 {anchor_id} 推送了话术建议。")
