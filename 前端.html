@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来世界 | Future World - 智能驱动的未来解决方案</title>
+    <style>
+        /* ================= 核心变量与重置 ================= */
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f8f9fa;
+            --accent-red: #d9001b;
+            --accent-red-hover: #b30015;
+            --text-main: #1a1a1a;
+            --text-light: #666666;
+            --border-color: #eaeaea;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-lg: 0 12px 32px rgba(217, 0, 27, 0.08);
+            --transition-fast: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-slow: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body { background-color: var(--primary-bg); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* ================= 滚动动画类 ================= */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .delay-1 { transition-delay: 0.1s; } .delay-2 { transition-delay: 0.2s; } .delay-3 { transition-delay: 0.3s; }
+
+        /* ================= 图片占位符（动态渐变色块） ================= */
+        .img-placeholder {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.9rem;
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* ================= 导航栏 (毛玻璃效果 + 下拉动画) ================= */
+        header {
+            position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000;
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center; transition: var(--transition-fast);
+        }
+        .nav-container { width: 90%; max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--accent-red); }
+        .logo img { height: 32px; width: auto; object-fit: contain; } /* LOGO 图片地址预留 */
+
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-item { position: relative; padding: 25px 0; cursor: pointer; font-weight: 500; font-size: 0.95rem; }
+        .nav-item::after {
+            content: ''; position: absolute; bottom: 15px; left: 0; width: 0; height: 2px;
+            background: var(--accent-red); transition: var(--transition-fast);
+        }
+        .nav-item:hover::after { width: 100%; }
+        .nav-item:hover { color: var(--accent-red); }
+
+        /* 下拉菜单动画 */
+        .dropdown {
+            position: absolute; top: 70px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: #fff; box-shadow: var(--shadow-sm); border-radius: 8px; border: 1px solid var(--border-color);
+            min-width: 160px; padding: 10px 0; opacity: 0; visibility: hidden; transition: var(--transition-fast); pointer-events: none;
+        }
+        .nav-item:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .dropdown li a { display: block; padding: 8px 20px; font-size: 0.9rem; color: var(--text-light); transition: 0.2s; }
+        .dropdown li a:hover { color: var(--accent-red); background: #fdf2f3; }
+
+        .lang-switch { font-size: 0.85rem; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 20px; cursor: pointer; }
+        .mobile-menu-btn { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+        .mobile-menu-btn span { width: 25px; height: 2px; background: var(--text-main); transition: 0.3s; }
+
+        /* ================= 英雄区域 (Hero) ================= */
+        .hero {
+            height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden;
+            background: radial-gradient(circle at 80% 20%, rgba(217, 0, 27, 0.05) 0%, transparent 40%), linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+        .hero-content { width: 90%; max-width: 1400px; margin: 0 auto; z-index: 2; position: relative; }
+        .hero-title { font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; }
+        .hero-title span { color: var(--accent-red); position: relative; }
+        .hero-subtitle { font-size: 1.2rem; color: var(--text-light); max-width: 600px; margin-bottom: 40px; }
+
+        .btn {
+            display: inline-block; padding: 12px 32px; background: var(--accent-red); color: #fff;
+            border-radius: 30px; font-weight: 600; letter-spacing: 1px; transition: var(--transition-fast);
+            box-shadow: 0 8px 20px rgba(217,0,27,0.3);
+        }
+        .btn:hover { background: var(--accent-red-hover); transform: translateY(-3px); box-shadow: 0 12px 25px rgba(217,0,27,0.4); }
+
+        /* 背景漂浮科技方块 */
+        .floating-blocks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .block { position: absolute; background: rgba(217, 0, 27, 0.03); border: 1px solid rgba(217, 0, 27, 0.08); border-radius: 10px; animation: float 10s infinite alternate linear; }
+        @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-100px) rotate(45deg); } }
+
+        /* ================= 通用Section样式 ================= */
+        section { padding: 80px 0; }
+        .section-container { width: 90%; max-width: 1400px; margin: 0 auto; }
+        .section-header { margin-bottom: 50px; display: flex; flex-direction: column; align-items: flex-start; }
+        .section-title { font-size: 2.5rem; font-weight: 800; position: relative; display: inline-block; margin-bottom: 10px; }
+        .section-title::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 40px; height: 3px; background: var(--accent-red); }
+        .section-subtitle { color: var(--text-light); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* ================= About Us (排版紧凑化) ================= */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .philosophy-box { background: var(--primary-bg); border: 1px solid var(--border-color); padding: 30px; border-radius: 12px; transition: var(--transition-fast); }
+        .philosophy-box:hover { box-shadow: var(--shadow-lg); border-color: transparent; transform: translateY(-5px); }
+        .phil-title { font-size: 1.8rem; font-weight: 700; color: var(--accent-red); margin-bottom: 10px; }
+
+        .mission-vision { display: flex; flex-direction: column; gap: 20px; }
+        .mv-card { background: var(--secondary-bg); padding: 25px; border-radius: 12px; border-left: 4px solid var(--accent-red); }
+        .mv-card h3 { margin-bottom: 5px; font-size: 1.2rem; }
+
+        /* 团队头像墙 */
+        .team-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 15px; margin-top: 40px; }
+        .team-member { text-align: center; }
+        .team-avatar { width: 100%; aspect-ratio: 1/1; border-radius: 50%; margin-bottom: 10px; transition: var(--transition-fast); }
+        .team-member:hover .team-avatar { transform: scale(1.1); box-shadow: var(--shadow-lg); }
+        .team-name { font-size: 0.8rem; font-weight: 600; }
+
+        /* ================= Services (一站式出海) ================= */
+        .services-wrapper { background: var(--secondary-bg); border-radius: 20px; padding: 50px; }
+        .service-tags { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .tag { border: 1px solid var(--accent-red); color: var(--accent-red); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; background: #fff; transition: 0.3s; }
+        .tag:hover { background: var(--accent-red); color: #fff; }
+
+        .service-layout { display: grid; grid-template-columns: 3fr 2fr; gap: 30px; }
+        .service-img-main { height: 350px; width: 100%; }
+        .service-cards { display: flex; flex-direction: column; gap: 20px; }
+        .s-card { background: var(--primary-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color); position: relative; overflow: hidden; transition: var(--transition-fast); cursor: pointer; }
+        .s-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-red); transform: scaleY(0); transition: 0.3s; transform-origin: top; }
+        .s-card:hover::before { transform: scaleY(1); }
+        .s-card:hover { box-shadow: var(--shadow-sm); transform: translateX(5px); }
+        .s-card-title { font-size: 1.5rem; font-weight: 800; color: var(--accent-red); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .s-card-title i { font-size: 1rem; background: var(--accent-red); color: #fff; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+
+        /* ================= AI Solutions ================= */
+        .solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .ai-hr-card { background: var(--accent-red); color: #fff; padding: 40px; border-radius: 20px; position: relative; overflow: hidden; }
+        .ai-hr-card h3 { font-size: 1.8rem; margin-bottom: 15px; }
+        .ai-hr-card p { opacity: 0.9; margin-bottom: 10px; font-size: 0.95rem; }
+
+        .solution-list { display: flex; flex-direction: column; }
+        .sl-item { display: flex; border-bottom: 1px solid var(--border-color); padding: 25px 0; transition: var(--transition-fast); cursor: pointer; }
+        .sl-num { font-size: 2.5rem; color: var(--accent-red); font-weight: 300; width: 80px; transition: 0.3s; }
+        .sl-content h4 { font-size: 1.2rem; margin-bottom: 5px; transition: 0.3s; }
+        .sl-content p { color: var(--text-light); font-size: 0.9rem; }
+        .sl-item:hover { transform: translateX(10px); }
+        .sl-item:hover .sl-num, .sl-item:hover .sl-content h4 { color: var(--accent-red-hover); font-weight: bold; }
+
+        /* ================= News & Events ================= */
+        .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .news-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: var(--transition-fast); display: flex; flex-direction: column; }
+        .news-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-8px); border-color: transparent; }
+        .news-img { height: 200px; width: 100%; border-radius: 0; }
+        .news-info { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .n-tag { font-size: 0.8rem; color: var(--accent-red); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; }
+        .n-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; line-height: 1.4; }
+        .n-desc { font-size: 0.9rem; color: var(--text-light); margin-bottom: 20px; flex-grow: 1; }
+        .n-link { color: var(--accent-red); font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; transition: 0.3s; }
+        .news-card:hover .n-link { gap: 10px; }
+
+        /* 招聘特殊卡片 */
+        .hire-card { position: relative; border: 2px dashed var(--accent-red); background: #fff5f5; }
+        .hire-stamp { position: absolute; right: 20px; top: 20px; font-size: 2rem; font-weight: 900; color: var(--accent-red); transform: rotate(-15deg); border: 3px solid var(--accent-red); padding: 5px 15px; opacity: 0.8; }
+
+        /* ================= Footer ================= */
+        footer { background: var(--accent-red); color: #fff; padding: 60px 0 30px; margin-top: 50px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .footer-logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .f-title { font-size: 1rem; font-weight: 700; margin-bottom: 20px; opacity: 0.9; }
+        .f-links li { margin-bottom: 10px; font-size: 0.85rem; opacity: 0.7; transition: 0.3s; cursor: pointer; }
+        .f-links li:hover { opacity: 1; padding-left: 5px; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6; }
+
+        /* ================= 响应式适配 (Mobile) ================= */
+        @media (max-width: 992px) {
+            .about-grid, .service-layout, .solution-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: repeat(4, 1fr); }
+            .news-grid { grid-template-columns: 1fr 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .nav-links, .lang-switch { display: none; }
+            .mobile-menu-btn { display: flex; }
+            .news-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+            /* 手机端菜单展开状态简单实现 */
+            .nav-active .nav-links {
+                display: flex; flex-direction: column; position: absolute; top: 70px; left: 0; width: 100%;
+                background: var(--primary-bg); padding: 20px; box-shadow: var(--shadow-sm); gap: 10px;
+            }
+            .nav-active .nav-item { padding: 10px 0; }
+            .nav-active .dropdown { position: relative; top: 0; left: 0; transform: none; box-shadow: none; border: none; padding-left: 20px; visibility: visible; opacity: 1; display: none; }
+            .nav-active .nav-item:hover .dropdown { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= Header ================= -->
+    <header id="header">
+        <div class="nav-container">
+            <!-- 预留图片LOGO地址: 将 src 替换为真实地址，去掉文字"未来世界"即可 -->
+            <a href="#" class="logo">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Q5MDAxYiIvPjxwYXRoIGQ9Ik0yMCA1MCBMNTAgMjAgTDgwIDUwIEw1MCA4MCBaIiBmaWxsPSIjZmZmIi8+PC9zdmc+" alt="Logo" style="border-radius:4px;">
+                未来世界
+            </a>
+
+            <ul class="nav-links">
+                <li class="nav-item">Home</li>
+                <li class="nav-item">
+                    服务 <span style="font-size:0.7rem;">▼</span>
+                    <ul class="dropdown">
+                        <li><a href="#">一站式出海</a></li>
+                        <li><a href="#">B2B 企业端</a></li>
+                        <li><a href="#">B2C 个人端</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    AI Family <span style="font-size:0.7rem;">▼</span>
+                    <ul class="dropdown">
+                        <li><a href="#">Dify 解决方案</a></li>
+                        <li><a href="#">AI 面试系统</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">资源</li>
+                <li class="nav-item">关于我们</li>
+                <li class="nav-item">联系我们</li>
+            </ul>
+
+            <div class="lang-switch">中文 ▾</div>
+
+            <div class="mobile-menu-btn" onclick="document.getElementById('header').classList.toggle('nav-active')">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= Hero ================= -->
+    <section class="hero">
+        <div class="floating-blocks">
+            <div class="block" style="width:100px; height:100px; left:10%; top:20%;"></div>
+            <div class="block" style="width:150px; height:150px; left:70%; top:60%; animation-delay: 2s;"></div>
+            <div class="block" style="width:80px; height:80px; left:40%; top:80%; animation-delay: 1s;"></div>
+        </div>
+        <div class="hero-content reveal">
+            <h1 class="hero-title">智能驱动<br>构建<span>未来</span>人才生态</h1>
+            <p class="hero-subtitle">我们以「通用人工智能(AGI)」与「具身智能」为核心，通过技术融合创造突破性价值。让科技人才找到理想工作，让企业找到合适人才。</p>
+            <a href="#about" class="btn">探索解决方案 →</a>
+        </div>
+    </section>
+
+    <!-- ================= About Us ================= -->
+    <section id="about" class="section-container">
+        <div class="section-header reveal">
+            <span class="section-subtitle">About Us</span>
+            <h2 class="section-title">公司理念与愿景</h2>
+        </div>
+
+        <div class="about-grid">
+            <div class="philosophy-box reveal delay-1">
+                <div class="phil-title">AI - Solve</div>
+                <p style="font-size:1.1rem; font-weight:600; margin-bottom:15px;">AGI + Embedded Intelligence</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size:0.9rem; color:var(--text-light);">
+                    <p><strong style="color:var(--text-main);">Speed:</strong> 敏捷响应应对技术变革</p>
+                    <p><strong style="color:var(--text-main);">Opportunity:</strong> 为人才与企业构建双向机遇</p>
+                    <p><strong style="color:var(--text-main);">Link:</strong> 建立全球科技生态的连接</p>
+                    <p><strong style="color:var(--text-main);">Value:</strong> 通过精准匹配实现多维价值增值</p>
+                    <p style="grid-column: span 2;"><strong style="color:var(--text-main);">Experience & Excellence:</strong> 追求极致的服务体验与专业卓越</p>
+                </div>
+            </div>
+
+            <div class="mission-vision reveal delay-2">
+                <div class="mv-card">
+                    <span style="color:var(--text-light); font-size:0.8rem; font-weight:bold;">MISSION 使命</span>
+                    <h3>"让科技人才找到理想工作，让企业找到合适人才"</h3>
+                </div>
+                <div class="mv-card" style="border-color: #333;">
+                    <span style="color:var(--text-light); font-size:0.8rem; font-weight:bold;">VISION 愿景</span>
+                    <h3>"成为定义数字科技人才平台标准的全球领导者"</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal delay-3" style="margin-top: 60px;">
+            <h3 style="font-size:1.2rem; margin-bottom:20px;">核心人物概览</h3>
+            <div class="team-grid">
+                <!-- 使用CSS动态色块代替头像图片 -->
+                <div class="team-member"><div class="team-avatar img-placeholder"></div><div class="team-name">福田敏男</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-0.5s"></div><div class="team-name">久保田直行</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-1s"></div><div class="team-name">许 春山</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-1.5s"></div><div class="team-name">真锅智章</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-2s"></div><div class="team-name">Yoshida Kaede</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-2.5s"></div><div class="team-name">松本 有</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-3s"></div><div class="team-name">田中 理</div></div>
+                <div class="team-member"><div class="team-avatar img-placeholder" style="animation-delay:-3.5s"></div><div class="team-name">五十岚 章夫</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Services ================= -->
+    <section id="services" class="section-container">
+        <div class="services-wrapper reveal">
+            <div class="section-header" style="margin-bottom: 30px;">
+                <span class="section-subtitle">SERVICES</span>
+                <h2 class="section-title">一站式<span style="color:var(--accent-red);">出海</span>服务</h2>
+            </div>
+
+            <div class="service-tags">
+                <span class="tag">10年日本市场经验</span>
+                <span class="tag">50+标准服务模块</span>
+                <span class="tag">1000+日本科技公司合作经验</span>
+                <span class="tag">100+优质专家、导师资源</span>
+            </div>
+
+            <div class="service-layout">
+                <!-- 用渐变色块代替货轮图片 -->
+                <div class="service-img-main img-placeholder" style="border-radius:16px;">
+                    <span style="color:#666; font-size:1.2rem; letter-spacing:2px;">一站式数字化出海解决方案展示图</span>
+                </div>
+
+                <div class="service-cards">
+                    <div class="s-card reveal delay-1">
+                        <div class="s-card-title">TO B <span>↗</span></div>
+                        <p style="font-weight:bold; margin-bottom:5px;">针对企业端</p>
+                        <p style="font-size:0.9rem; color:var(--text-light);">个性化制定：市场调研 + 合规性对策 + 营销基础搭建 + 行业咨询 + 产品服务</p>
+                    </div>
+                    <div class="s-card reveal delay-2">
+                        <div class="s-card-title">TO C <span>↗</span></div>
+                        <p style="font-weight:bold; margin-bottom:5px;">针对个人端</p>
+                        <p style="font-size:0.9rem; color:var(--text-light);">1+4+N 一站式服务 = 一个平台 + 4个系统 + N个服务</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= AI Solutions ================= -->
+    <section id="solutions" class="section-container">
+        <div class="section-header reveal">
+            <span class="section-subtitle">SOLUTION</span>
+            <h2 class="section-title">AI人才解决方案集合</h2>
+        </div>
+
+        <div class="solution-grid">
+            <div class="ai-hr-card reveal delay-1">
+                <h3>我是AI人才HR,</h3>
+                <p>我的使命是帮助科技人才找到理想的工作，也帮助企业找到最合适的人才。</p>
+                <p>拥有丰富的人才库，实现高效、精准的人才匹配。</p>
+                <p>无论是规划职业发展，还是优化招聘流程，我都致力于让每一次匹配更智能、更可靠。</p>
+                <!-- 用色块代替右下角的AI人物图片，仅作占位示意 -->
+                <div class="img-placeholder" style="position:absolute; right:-20px; bottom:-20px; width:150px; height:150px; border-radius:50%; background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0)); border:1px solid rgba(255,255,255,0.3);"></div>
+            </div>
+
+            <div class="solution-list reveal delay-2">
+                <div class="sl-item">
+                    <div class="sl-num">01</div>
+                    <div class="sl-content">
+                        <h4>Dify 解决方案</h4>
+                        <p>帮助企业和人才高效连接，智能分析职位需求与个人能力，实现精准匹配。</p>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-num">02</div>
+                    <div class="sl-content">
+                        <h4>AI 面试解决方案</h4>
+                        <p>可模拟标准化面试流程，评估候选人能力与潜力，提高面试效率，降低人为偏差。</p>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-num">03</div>
+                    <div class="sl-content">
+                        <h4>AI 教员解决方案</h4>
+                        <p>为企业内部培训和人才发展提供个性化指导，制定学习计划，快速提升技能。</p>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-num">04</div>
+                    <div class="sl-content">
+                        <h4>AI 简历解决方案</h4>
+                        <p>自动解析、优化简历内容，突出核心优势，并智能匹配岗位需求。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= News ================= -->
+    <section id="news" class="section-container">
+        <div class="section-header reveal">
+            <span class="section-subtitle">NEWS</span>
+            <h2 class="section-title">最新动态</h2>
+        </div>
+
+        <div class="news-grid">
+            <!-- 新闻卡片1 -->
+            <div class="news-card reveal delay-1">
+                <div class="news-img img-placeholder">活动现场图占位</div>
+                <div class="news-info">
+                    <div class="n-tag">活动 TO B</div>
+                    <h3 class="n-title">探访日本·解码转型<br><span style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">对话日本企业的DX*AI探索之路</span></h3>
+                    <p class="n-desc">📅 时间：2025年9月10-11日<br>📍 地点：日本·东京<br>本次参与活动旨在为中国 AI SaaS 企业搭建一个深入日本市场的桥梁...</p>
+                    <a href="#" class="n-link">了解详情 →</a>
+                </div>
+            </div>
+
+            <!-- 招聘卡片2 (无图排版) -->
+            <div class="news-card hire-card reveal delay-2">
+                <div class="hire-stamp">HIRE</div>
+                <div class="news-info" style="justify-content: center; padding: 40px 30px;">
+                    <div class="n-tag">招聘</div>
+                    <h3 class="n-title" style="font-size:1.8rem;">AI技术工程师</h3>
+                    <p class="n-desc" style="flex-grow:0; margin-bottom:40px;">寻找具有卓越 AI 模型微调能力、熟悉大模型架构的顶尖人才...</p>
+                    <a href="#" class="n-link" style="margin-top:auto;">加入我们 →</a>
+                </div>
+            </div>
+
+            <!-- 新闻卡片3 (无图简约版) -->
+            <div class="news-card reveal delay-3" style="background:var(--secondary-bg);">
+                <div class="news-info" style="justify-content: center;">
+                    <div class="n-tag">事件</div>
+                    <h3 class="n-title" style="font-size:1.5rem;">集团XXX项目获奖</h3>
+                    <p class="n-desc">凭借在数字科技人才匹配领域的创新性技术应用，我司最新孵化项目荣获年度最佳创新大奖...</p>
+                    <a href="#" class="n-link">了解详情 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Footer ================= -->
+    <footer>
+        <div class="section-container">
+            <div class="footer-grid">
+                <div>
+                    <!-- 底部LOGO -->
+                    <div class="footer-logo">
+                        <svg width="24" height="24" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><path d="M20 50 L50 20 L80 50 L50 80 Z" fill="#d9001b"/></svg>
+                        未来世界集团
+                    </div>
+                    <p style="font-size:0.85rem; opacity:0.8; margin-bottom:15px;">
+                        <strong>中国研发中心</strong><br>
+                        上海市闵行区剑川路900号4栋<br>
+                        江苏省苏州市姑苏区...
+                    </p>
+                    <p style="font-size:0.85rem; opacity:0.8;">
+                        <strong>日本机器人售后中心</strong><br>
+                        日本东京都千代田区丸之内...
+                    </p>
+                </div>
+                <div>
+                    <h4 class="f-title">HOME</h4>
+                    <ul class="f-links">
+                        <li>首页</li><li>关于我们</li><li>服务简介</li><li>AI Family</li><li>新闻</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="f-title">服务</h4>
+                    <ul class="f-links">
+                        <li>服务介绍</li><li>中国服务</li><li>日本服务</li><li>全球服务</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="f-title">AI Family</h4>
+                    <ul class="f-links">
+                        <li>Dify 解决方案</li><li>AI 面试解决方案</li><li>AI 简历解决方案</li><li>AI 人才介绍代理</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="f-title">联系我们</h4>
+                    <ul class="f-links">
+                        <li>商务合作</li><li>加入我们</li>
+                    </ul>
+                    <p style="margin-top:20px; font-weight:bold; font-size:0.9rem;">客服建议及合作: 12345678910</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>Copyright © 2019-2026 上海未来世界有限公司版权所有 沪ICP备123456号-1</span>
+                <span>沪公网安备12345</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= JS 交互与动画 ================= -->
+    <script>
+        // 滚动视差与元素浮现动画 (Intersection Observer)
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // 元素出现15%时触发
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target); // 触发一次后取消观察，优化性能
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => observer.observe(el));
+
+            // 导航栏滚动毛玻璃加深效果
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.style.background = 'rgba(255, 255, 255, 0.95)';
+                    header.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                } else {
+                    header.style.background = 'rgba(255, 255, 255, 0.85)';
+                    header.style.boxShadow = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
